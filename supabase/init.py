@@ -6,35 +6,39 @@ supabase_client = supabase.create_client(
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpc3VobXFzaHlubmpoYnF0ZWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODI4NjI1NDUsImV4cCI6MTk5ODQzODU0NX0.p6QQHYJBiEzXKgxuPDKx3b7maqrke2qCO9hshYWtAW8",
 )
 
-# Create table schema
-table_name = "loan_applications"
-table_schema = """
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    solo_applicant BOOLEAN,
-    broker_referral BOOLEAN,
-    broker_full_name TEXT,
-    broker_company TEXT,
-    full_name TEXT,
-    mobile_number TEXT,
-    email_address TEXT,
-    second_applicant_name TEXT,
-    second_applicant_mobile_number TEXT,
-    second_applicant_email_address TEXT,
-    how_did_you_hear_about_us TEXT,
-    admits_to_defaults BOOLEAN,
-    business_name TEXT,
-    abn TEXT,
-    business_nature TEXT,
-    loan_purpose TEXT,
-    loan_amount FLOAT8,
-    business_address TEXT,
-    collect_document TEXT,
-    collect_document2 TEXT
-"""
+# Define function to create table
+def create_table():
+    table_name = "loan_applications"
+    table_schema = {
+        "id": "uuid",
+        "solo_applicant": "boolean",
+        "broker_referral": "boolean",
+        "broker_full_name": "text",
+        "broker_company": "text",
+        "full_name": "text",
+        "mobile_number": "text",
+        "email_address": "text",
+        "second_applicant_name": "text",
+        "second_applicant_mobile_number": "text",
+        "second_applicant_email_address": "text",
+        "how_did_you_hear_about_us": "text",
+        "admits_to_defaults": "boolean",
+        "business_name": "text",
+        "abn": "text",
+        "business_nature": "text",
+        "loan_purpose": "text",
+        "loan_amount": "float8",
+        "business_address": "text",
+        "collect_document": "text",
+        "collect_document2": "text"
+    }
+    result = supabase_client.table(table_name).create(table_schema)
+    
+    # Return response
+    if result.get("error"):
+        return f"Table creation failed with error: {result['error']}"
+    else:
+        return "Table created successfully."
 
-# Execute SQL statement to create table
-query = f"CREATE TABLE {table_name} ({table_schema})"
-result = supabase_client.execute(query)
-
-# Print the result
-print(result)
+# Example usage
+create_table()
