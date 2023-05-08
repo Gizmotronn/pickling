@@ -5,14 +5,15 @@ import { Database } from '@/types/supabase';
 type Profiles = Database['public']['Tables']['profiles']['Row'];
 
 export default function Account({ session }: { session: Session }) {
-  const supabase = useSupabaseClient<Database>()
-  const user = useUser()
-  const [loading, setLoading] = useState(true)
-  const [avatar_url, setAvatarUrl] = useState<Profiles['avatar_url']>(null)
+  const supabase = useSupabaseClient<Database>();
+  const user = useUser();
+  const [loading, setLoading] = useState(true);
+  const [avatar_url, setAvatarUrl] = useState<Profiles['avatar_url']>(null);
+  const [full_name, setFullName] = useState<Profiles['full_name']>(null);
 
   useEffect(() => {
-    getProfile()
-  }, [session])
+    getProfile();
+  }, [session]);
 
   async function getProfile() {
     try {
@@ -21,7 +22,7 @@ export default function Account({ session }: { session: Session }) {
 
       let { data, error, status } = await supabase
         .from('profiles')
-        .select(`username, website, avatar_url`)
+        .select(`full_name, avatar_url`)
         .eq('id', user.id)
         .single()
 
@@ -30,20 +31,23 @@ export default function Account({ session }: { session: Session }) {
       }
 
       if (data) {
-        setAvatarUrl(data.avatar_url)
+        setFullName(data.full_name);
+        setAvatarUrl(data.avatar_url);
       }
     } catch (error) {
-      alert('Error loading user data!')
-      console.log(error)
+      alert('Error loading user data!');
+      console.log(error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function updateProfile({
+    full_name,
     avatar_url,
   }: {
-    avatar_url: Profiles['avatar_url']
+    avatar_url: Profiles['avatar_url'],
+    full_name: Profiles['full_name']
   }) {
     try {
       setLoading(true)
@@ -52,17 +56,17 @@ export default function Account({ session }: { session: Session }) {
       const updates = {
         id: user.id,
         avatar_url,
-        updated_at: new Date().toISOString(),
-      }
+        full_name,
+      };
 
-      let { error } = await supabase.from('profiles').upsert(updates)
-      if (error) throw error
-      alert('Profile updated!')
+      let { error } = await supabase.from('profiles').upsert(updates);
+      if (error) throw error;
+      alert('Profile updated!');
     } catch (error) {
-      alert('Error updating the data!')
-      console.log(error)
+      alert('Error updating the data!');
+      console.log(error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -72,11 +76,15 @@ export default function Account({ session }: { session: Session }) {
         <label htmlFor="email">Email</label>
         <input id="email" type="text" value={session.user.email} disabled />
       </div>
+      <div>
+        <label htmlFor="email">Full name</label>
+        <input id="email" type="text" value={full_name || ''} onChange={(e) => setFullName(e.target.value)} />
+      </div>
 
       <div>
         <button
           className="button primary block"
-          onClick={() => updateProfile({ avatar_url })}
+          onClick={() => updateProfile({ avatar_url, full_name })}
           disabled={loading}
         >
           {loading ? 'Loading ...' : 'Update'}
